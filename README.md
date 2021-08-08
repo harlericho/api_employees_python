@@ -7,9 +7,9 @@
 - Tener instalado pyhton 3.x o superior
 - Tener pip instalado:
 - Crear un entorno virtual con virtualenv o venv
-- Tener instalado:
+- Ejecutar requirements.txt (Cargar los paquetes de env):
     
-   > pip flask, mysql, cors
+   > pip install -r requirements.txt
 
 
 ========================================================
