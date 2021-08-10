@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import employees
-
+import validations
 app = Flask(__name__)
 CORS(app)
 
@@ -25,9 +25,11 @@ def search(id):
     try:
         data = employees.getListId(id)
         if data != None:
-            return jsonify({'employees': data})
+            file = {'id': data[0], 'names': data[1], 'email': data[2],
+                    'age': data[3]}
+            return jsonify({'employees': file})
         else:
-            return jsonify({'employees': 'No data'})
+            return jsonify({'employees': 'No data with that id'})
     except Exception as e:
         return jsonify({'Error': e})
 
@@ -40,9 +42,12 @@ def create():
             names = json['names']
             email = json['email']
             age = json['age']
-        data = employees.postData(names, email, age)
-        if data == True:
-            return jsonify({'employees': 'Save data'})
+        if validations.validations(names, email, age):
+            return jsonify({'errors':'There are null values ​​in the data inputs'})
+        else:
+            data = employees.postData(names, email, age)
+            if data == True:
+                return jsonify({'employees': 'Save data'})
     except Exception as e:
         return jsonify({'Error': e})
 
@@ -50,14 +55,18 @@ def create():
 @app.route('/<int:id>', methods=['PUT'])
 def update(id):
     try:
-        json = request.json
-        if request.method == 'PUT':
-            names = json['names']
-            email = json['email']
-            age = json['age']
-        data = employees.putData(names, email, age, id)
-        if data == True:
-            return jsonify({'employees': 'Updating data'})
+        file = employees.getListId(id)
+        if file != None:
+            json = request.json
+            if request.method == 'PUT':
+                names = json['names']
+                email = json['email']
+                age = json['age']
+            data = employees.putData(names, email, age, id)
+            if data == True:
+                return jsonify({'employees': 'Updating data'})
+        else:
+            return jsonify({'employees': 'No data with that id'})
     except Exception as e:
         return jsonify({'Error': e})
 
@@ -65,11 +74,12 @@ def update(id):
 @app.route('/<int:id>', methods=['DELETE'])
 def delete(id):
     try:
-        data = employees.deleteData(id)
-        if data != None:
+        file = employees.getListId(id)
+        if file != None:
+            data = employees.deleteData(id)
             return jsonify({'employees': 'DeLeting data'})
         else:
-            return jsonify({'employees': 'No data'})
+            return jsonify({'employees': 'No data with that id'})
     except Exception as e:
         return jsonify({'Error': e})
 
